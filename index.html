@@ -1,0 +1,1036 @@
+<!DOCTYPE html>
+<html lang="es" class="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Casino Estelar Royale - Dinámica WhatsApp</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    colors: {
+                        casino: {
+                            gold: '#D4AF37',
+                            darkGold: '#AA771C',
+                            darkGreen: '#062312',
+                            neonGreen: '#00FF66',
+                            darkBg: '#080c09',
+                            cardBg: '#111812'
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+    <!-- Canvas Confetti -->
+    <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.5.1/dist/confetti.browser.min.js"></script>
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@600;700;900&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Plus Jakarta Sans', sans-serif;
+        }
+        .cinzel-font {
+            font-family: 'Cinzel', serif;
+        }
+        .neon-glow-gold {
+            box-shadow: 0 0 25px rgba(212, 175, 55, 0.25);
+        }
+        .neon-glow-green {
+            box-shadow: 0 0 25px rgba(0, 255, 102, 0.3);
+        }
+        @keyframes pulse-slow {
+            0%, 100% { opacity: 1; transform: scale(1); }
+            50% { opacity: 0.9; transform: scale(1.01); }
+        }
+        .animate-pulse-slow {
+            animation: pulse-slow 3s infinite ease-in-out;
+        }
+        /* Card Flip Animation for Blackjack */
+        .perspective-1000 {
+            perspective: 1000px;
+        }
+        .transform-style-3d {
+            transform-style: preserve-3d;
+        }
+        .backface-hidden {
+            backface-visibility: hidden;
+        }
+        .rotate-y-180 {
+            transform: rotateY(180deg);
+        }
+    </style>
+</head>
+<body class="bg-casino-darkBg text-white min-h-screen flex flex-col justify-between bg-[radial-gradient(ellipse_at_top,_var(--tw-gradient-stops))] from-emerald-950/60 via-zinc-950 to-black">
+
+    <!-- Header / Navbar -->
+    <header class="w-full border-b border-casino-gold/30 bg-black/70 backdrop-blur-md py-4 px-6 sticky top-0 z-40">
+        <div class="max-w-7xl mx-auto flex flex-col sm:flex-row justify-between items-center gap-3">
+            <div class="flex items-center gap-3 cursor-pointer" onclick="returnToLobby()">
+                <span class="text-3xl animate-bounce">⭐</span>
+                <div>
+                    <h1 class="cinzel-font text-2xl font-bold tracking-wider text-transparent bg-clip-text bg-gradient-to-r from-amber-200 via-casino-gold to-amber-500">
+                        CASINO ESTELAR ROYALE
+                    </h1>
+                    <p class="text-xs text-emerald-400 font-medium tracking-widest uppercase">Dinámica WhatsApp • Edición Sincronizada</p>
+                </div>
+            </div>
+            <div class="flex items-center gap-3">
+                <button onclick="returnToLobby()" id="lobbyNavBtn" class="hidden px-4 py-1.5 bg-zinc-800 hover:bg-zinc-700 text-amber-300 text-xs font-bold rounded-xl border border-amber-500/30 transition">
+                    🏠 Volver al Lobby
+                </button>
+                <div class="flex items-center gap-2 bg-emerald-950/60 border border-emerald-500/40 px-4 py-1.5 rounded-full text-xs text-emerald-300 shadow-inner">
+                    <span id="firebaseStatusDot" class="w-2.5 h-2.5 rounded-full bg-amber-400 animate-ping"></span>
+                    <span id="firebaseStatusText" class="font-bold">Sincronizando Firebase...</span>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Container -->
+    <main class="max-w-7xl mx-auto px-4 py-8 flex-grow w-full">
+        
+        <!-- ================= LOBBY VIEW (4 GAMES) ================= -->
+        <div id="lobbyView" class="space-y-8">
+            <!-- Hero Banner -->
+            <section class="text-center">
+                <div class="inline-block p-1 bg-gradient-to-r from-amber-600 via-casino-gold to-amber-600 rounded-3xl mb-4 neon-glow-gold animate-pulse-slow w-full max-w-3xl">
+                    <div class="bg-casino-cardBg px-6 py-6 rounded-[22px]">
+                        <h2 class="cinzel-font text-2xl sm:text-3xl font-bold text-amber-300 mb-2">SALÓN DE JUEGOS VIP (4 MODOS)</h2>
+                        <p class="text-gray-300 text-sm sm:text-base leading-relaxed">
+                            Selecciona uno de los 4 juegos exclusivos. Apuesta en <strong class="text-amber-400">Millones de Estrellas (⭐)</strong>. Todos los resultados se sincronizan en tiempo real con el grupo.
+                        </p>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Grid of 4 Games -->
+            <section class="grid grid-cols-1 md:grid-cols-2 gap-6 max-w-5xl mx-auto">
+                
+                <!-- Game 1: Ruleta de Riesgo -->
+                <div onclick="openModalitySelector('ruleta')" class="group relative bg-gradient-to-b from-[#141c15] to-[#0a0f0b] border border-amber-500/40 hover:border-amber-400 rounded-2xl p-6 transition-all duration-300 hover:scale-[1.02] cursor-pointer shadow-xl hover:shadow-amber-500/30 flex flex-col justify-between">
+                    <div>
+                        <div class="flex justify-between items-start mb-4">
+                            <span class="text-4xl p-3 bg-amber-950/60 rounded-2xl border border-amber-500/30">🎡</span>
+                            <span class="text-xs font-bold px-3 py-1 bg-amber-500/20 text-amber-300 rounded-full border border-amber-500/30">3 Modalidades (Hasta x4)</span>
+                        </div>
+                        <h3 class="cinzel-font text-xl font-bold text-amber-300 mb-2">1. Ruleta de Riesgo</h3>
+                        <p class="text-gray-400 text-xs sm:text-sm mb-6">Elige entre Doble (50%), Triple (25%) o Cuádruple (10%) o nada con rueda gráfica interactiva en Canvas y animación de suspenso.</p>
+                    </div>
+                    <button class="w-full py-3 bg-gradient-to-r from-amber-600 to-yellow-600 hover:from-amber-500 hover:to-yellow-500 text-black font-bold rounded-xl text-sm transition shadow-md">
+                        Jugar Ruleta 🎯
+                    </button>
+                </div>
+
+                <!-- Game 2: Tragamonedas Estelar -->
+                <div onclick="openModalitySelector('slots')" class="group relative bg-gradient-to-b from-[#12181f] to-[#080b0f] border border-blue-500/40 hover:border-blue-400 rounded-2xl p-6 transition-all duration-300 hover:scale-[1.02] cursor-pointer shadow-xl hover:shadow-blue-500/30 flex flex-col justify-between">
+                    <div>
+                        <div class="flex justify-between items-start mb-4">
+                            <span class="text-4xl p-3 bg-blue-950/60 rounded-2xl border border-blue-500/30">🎰</span>
+                            <span class="text-xs font-bold px-3 py-1 bg-blue-500/20 text-blue-300 rounded-full border border-blue-500/30">3 Modalidades (Hasta x5)</span>
+                        </div>
+                        <h3 class="cinzel-font text-xl font-bold text-blue-300 mb-2">2. Tragamonedas Estelar</h3>
+                        <p class="text-gray-400 text-xs sm:text-sm mb-6">Gira los rodillos en Estándar (x2), Galáctico (x3) o Hiperespacio (x5) con animación fluida de símbolos estelares.</p>
+                    </div>
+                    <button class="w-full py-3 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-500 hover:to-indigo-500 text-white font-bold rounded-xl text-sm transition shadow-md">
+                        Girar Slots 💎
+                    </button>
+                </div>
+
+                <!-- Game 3: Cofres del Tesoro -->
+                <div onclick="openModalitySelector('cofres')" class="group relative bg-gradient-to-b from-[#1c1712] to-[#0e0b09] border border-amber-600/40 hover:border-amber-500 rounded-2xl p-6 transition-all duration-300 hover:scale-[1.02] cursor-pointer shadow-xl hover:shadow-amber-600/30 flex flex-col justify-between">
+                    <div>
+                        <div class="flex justify-between items-start mb-4">
+                            <span class="text-4xl p-3 bg-amber-950/60 rounded-2xl border border-amber-600/30">🗝️</span>
+                            <span class="text-xs font-bold px-3 py-1 bg-amber-600/20 text-amber-300 rounded-full border border-amber-600/30">3 Modalidades (Hasta x4)</span>
+                        </div>
+                        <h3 class="cinzel-font text-xl font-bold text-amber-400 mb-2">3. Cofres del Tesoro</h3>
+                        <p class="text-gray-400 text-xs sm:text-sm mb-6">Elige entre 3 Cofres (1 trampa, x2), 5 Cofres (2 trampas, x3) o 4 Cofres Letales (3 trampas, x4) con apertura animada.</p>
+                    </div>
+                    <button class="w-full py-3 bg-gradient-to-r from-amber-700 to-yellow-700 hover:from-amber-600 hover:to-yellow-600 text-white font-bold rounded-xl text-sm transition shadow-md">
+                        Abrir Cofre 🗝️
+                    </button>
+                </div>
+
+                <!-- Game 4: Blackjack Rápido -->
+                <div onclick="openModalitySelector('blackjack')" class="group relative bg-gradient-to-b from-[#111915] to-[#070b09] border border-emerald-500/40 hover:border-emerald-400 rounded-2xl p-6 transition-all duration-300 hover:scale-[1.02] cursor-pointer shadow-xl hover:shadow-emerald-500/30 flex flex-col justify-between">
+                    <div>
+                        <div class="flex justify-between items-start mb-4">
+                            <span class="text-4xl p-3 bg-emerald-950/60 rounded-2xl border border-emerald-500/30">🃏</span>
+                            <span class="text-xs font-bold px-3 py-1 bg-emerald-500/20 text-emerald-300 rounded-full border border-emerald-500/30">3 Modalidades (Hasta x4)</span>
+                        </div>
+                        <h3 class="cinzel-font text-xl font-bold text-emerald-300 mb-2">4. Blackjack Rápido (21)</h3>
+                        <p class="text-gray-400 text-xs sm:text-sm mb-6">Duelo Estándar (x2), Mano Tensa (x3) o Blackjack Extremo (x4) con renderizado visual de cartas y animación de giro.</p>
+                    </div>
+                    <button class="w-full py-3 bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-500 hover:to-teal-500 text-white font-bold rounded-xl text-sm transition shadow-md">
+                        Jugar Blackjack ♠️
+                    </button>
+                </div>
+
+            </section>
+        </div>
+
+        <!-- ================= ACTIVE GAME VIEW ================= -->
+        <div id="gameView" class="hidden space-y-6">
+            <!-- Dynamic Game Container inserted here -->
+        </div>
+
+        <!-- ================= LIVE HISTORY SECTION (REAL-TIME FIREBASE) ================= -->
+        <section class="mt-12 bg-casino-cardBg border border-casino-gold/20 rounded-2xl p-6 shadow-xl">
+            <div class="flex flex-col sm:flex-row justify-between items-center mb-6 gap-4">
+                <div>
+                    <h3 class="cinzel-font text-lg font-bold text-amber-300">Historial Global Sincronizado (En Vivo)</h3>
+                    <p class="text-xs text-gray-400">Todos los jugadores conectados ven este historial instantáneamente. ¡Perfecto para WhatsApp!</p>
+                </div>
+                <div>
+                    <button onclick="copyHistoryText()" class="px-5 py-2.5 bg-emerald-700 hover:bg-emerald-600 text-white text-xs font-semibold rounded-xl shadow-lg transition flex items-center gap-2">
+                        <span>📋 Copiar Resumen para WhatsApp</span>
+                    </button>
+                </div>
+            </div>
+
+            <div class="overflow-x-auto">
+                <table class="w-full text-left border-collapse">
+                    <thead>
+                        <tr class="border-b border-zinc-800 text-xs text-gray-400 cinzel-font">
+                            <th class="py-3 px-4">Hora</th>
+                            <th class="py-3 px-4">Jugador</th>
+                            <th class="py-3 px-4">Juego / Modalidad</th>
+                            <th class="py-3 px-4">Apuesta</th>
+                            <th class="py-3 px-4">Resultado</th>
+                            <th class="py-3 px-4 text-right">Ganancia / Pérdida (⭐)</th>
+                        </tr>
+                    </thead>
+                    <tbody id="historyTableBody" class="text-sm divide-y divide-zinc-900">
+                        <tr id="emptyHistoryRow">
+                            <td colspan="6" class="py-8 text-center text-gray-500 text-xs">Cectando con Firebase en tiempo real...</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </section>
+
+    </main>
+
+    <!-- FOOTER -->
+    <footer class="w-full border-t border-zinc-900 bg-black py-4 px-6 text-center text-xs text-gray-500">
+        <p>Casino Estelar Royale • Dinámica de WhatsApp sincronizada en la nube</p>
+    </footer>
+
+    <!-- ================= MODALITY SELECTOR MODAL ================= -->
+    <div id="modalityModal" class="fixed inset-0 z-50 flex items-center justify-center bg-black/85 backdrop-blur-md hidden p-4">
+        <div class="bg-[#121614] border border-casino-gold/50 rounded-2xl w-full max-w-md p-6 shadow-2xl relative animate-in fade-in zoom-in duration-200">
+            <div class="flex justify-between items-center mb-4 border-b border-zinc-800 pb-3">
+                <div>
+                    <span id="modalityGameIcon" class="text-2xl mr-2">⭐</span>
+                    <h3 id="modalityGameTitle" class="cinzel-font text-lg font-bold text-amber-300 inline-block">Seleccionar Modalidad</h3>
+                </div>
+                <button onclick="closeModalityModal()" class="text-gray-400 hover:text-white text-lg font-bold px-2 py-0.5 rounded-lg bg-zinc-800/50">✕</button>
+            </div>
+            
+            <div id="modalityOptionsContainer" class="space-y-3 mb-6">
+                <!-- Injected Modality Options -->
+            </div>
+
+            <div class="flex gap-3">
+                <button type="button" onclick="closeModalityModal()" class="flex-1 py-3 bg-zinc-800 hover:bg-zinc-700 text-gray-300 font-semibold rounded-xl text-sm transition">
+                    Cancelar
+                </button>
+                <button type="button" onclick="proceedToBetModal()" class="flex-1 py-3 bg-gradient-to-r from-amber-500 to-yellow-600 hover:from-amber-400 hover:to-yellow-500 text-black font-bold rounded-xl text-sm transition shadow-lg shadow-amber-500/20">
+                    Siguiente: Apuesta ➡️
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- ================= BET MODAL ================= -->
+    <div id="betModal" class="fixed inset-0 z-50 flex items-center justify-center bg-black/85 backdrop-blur-md hidden p-4">
+        <div class="bg-[#121614] border border-casino-gold/50 rounded-2xl w-full max-w-md p-6 shadow-2xl relative animate-in fade-in zoom-in duration-200">
+            <div class="flex justify-between items-center mb-4 border-b border-zinc-800 pb-3">
+                <div>
+                    <span id="betGameIcon" class="text-2xl mr-2">⭐</span>
+                    <h3 id="betTitle" class="cinzel-font text-lg font-bold text-amber-300 inline-block">Configurar Apuesta</h3>
+                </div>
+                <button onclick="closeBetModal()" class="text-gray-400 hover:text-white text-lg font-bold px-2 py-0.5 rounded-lg bg-zinc-800/50">✕</button>
+            </div>
+            
+            <form id="betForm" onsubmit="submitBetModal(event)" class="space-y-4">
+                <div>
+                    <label class="block text-xs font-semibold text-gray-300 uppercase tracking-wider mb-1.5">Tu Nombre o Apodo en el Grupo</label>
+                    <input type="text" id="modalPlayerName" required placeholder="Ej. Carlos G." 
+                           class="w-full bg-zinc-900 border border-zinc-700 rounded-xl px-4 py-3 text-white placeholder-zinc-600 focus:outline-none focus:border-casino-gold text-sm transition">
+                </div>
+
+                <div>
+                    <label class="block text-xs font-semibold text-gray-300 uppercase tracking-wider mb-1.5">Monto en Millones de Estrellas (⭐)</label>
+                    <div class="relative">
+                        <input type="number" id="modalBetAmount" required min="1" placeholder="Ej. 10 (Millones)" 
+                               class="w-full bg-zinc-900 border border-zinc-700 rounded-xl px-4 py-3 text-white placeholder-zinc-600 focus:outline-none focus:border-casino-gold text-sm transition pr-12">
+                        <span class="absolute right-4 top-3 text-amber-400 font-bold text-sm">M ⭐</span>
+                    </div>
+                    <!-- Quick Million Buttons -->
+                    <div class="flex gap-2 mt-2">
+                        <button type="button" onclick="setQuickBet(5)" class="flex-1 py-1 bg-zinc-800 hover:bg-zinc-700 text-xs text-amber-300 rounded-lg border border-zinc-700">5M</button>
+                        <button type="button" onclick="setQuickBet(10)" class="flex-1 py-1 bg-zinc-800 hover:bg-zinc-700 text-xs text-amber-300 rounded-lg border border-zinc-700">10M</button>
+                        <button type="button" onclick="setQuickBet(25)" class="flex-1 py-1 bg-zinc-800 hover:bg-zinc-700 text-xs text-amber-300 rounded-lg border border-zinc-700">25M</button>
+                        <button type="button" onclick="setQuickBet(50)" class="flex-1 py-1 bg-zinc-800 hover:bg-zinc-700 text-xs text-amber-300 rounded-lg border border-zinc-700">50M</button>
+                        <button type="button" onclick="setQuickBet(100)" class="flex-1 py-1 bg-zinc-800 hover:bg-zinc-700 text-xs text-amber-300 rounded-lg border border-zinc-700">100M</button>
+                    </div>
+                </div>
+
+                <div class="flex gap-3 pt-2">
+                    <button type="button" onclick="backToModalityModal()" class="flex-1 py-3 bg-zinc-800 hover:bg-zinc-700 text-gray-300 font-semibold rounded-xl text-sm transition">
+                        ⬅️ Volver
+                    </button>
+                    <button type="submit" class="flex-1 py-3 bg-gradient-to-r from-amber-500 to-yellow-600 hover:from-amber-400 hover:to-yellow-500 text-black font-bold rounded-xl text-sm transition shadow-lg shadow-amber-500/20">
+                        ¡A JUGAR! 🚀
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- ================= FIREBASE & APP LOGIC ================= -->
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
+        import { getAuth, signInAnonymously, signInWithCustomToken } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
+        import { getFirestore, collection, addDoc, onSnapshot } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+
+        let db = null;
+        let auth = null;
+        let userId = null;
+        const appId = typeof __app_id !== 'undefined' ? __app_id : 'casino-estelar-royale-whatsapp';
+
+        // Global State
+        window.currentSelectedGame = null;
+        window.currentSelectedModality = null;
+        window.playerData = { name: '', betMillions: 10, modalityName: '' };
+        window.betHistory = [];
+
+        // Initialize Firebase
+        async function initFirebaseApp() {
+            const statusDot = document.getElementById('firebaseStatusDot');
+            const statusText = document.getElementById('firebaseStatusText');
+            try {
+                const firebaseConfig = JSON.parse(typeof __firebase_config !== 'undefined' ? __firebase_config : '{}');
+                if (!firebaseConfig.apiKey) {
+                    throw new Error("No config available");
+                }
+                const app = initializeApp(firebaseConfig);
+                auth = getAuth(app);
+                db = getFirestore(app);
+
+                if (typeof __initial_auth_token !== 'undefined' && __initial_auth_token) {
+                    await signInWithCustomToken(auth, __initial_auth_token);
+                } else {
+                    await signInAnonymously(auth);
+                }
+                userId = auth.currentUser?.uid || crypto.randomUUID();
+
+                statusDot.className = "w-2.5 h-2.5 rounded-full bg-emerald-400";
+                statusText.innerText = "Sincronizado en Vivo";
+
+                setupRealtimeHistory();
+            } catch (e) {
+                console.warn("Firebase running in local mode:", e);
+                statusDot.className = "w-2.5 h-2.5 rounded-full bg-amber-400";
+                statusText.innerText = "Modo Local (Sin red)";
+                updateHistoryTable();
+            }
+        }
+
+        function setupRealtimeHistory() {
+            if (!db) return;
+            const q = collection(db, 'artifacts', appId, 'public', 'data', 'history');
+            onSnapshot(q, (snapshot) => {
+                let items = [];
+                snapshot.forEach(docSnap => {
+                    items.push({ id: docSnap.id, ...docSnap.data() });
+                });
+                // Sort in memory by timestamp descending
+                items.sort((a, b) => (b.timestamp || 0) - (a.timestamp || 0));
+                window.betHistory = items;
+                updateHistoryTable();
+            }, (error) => {
+                console.error("Firestore error:", error);
+            });
+        }
+
+        window.recordGameHistory = async function(gameName, modality, bet, isWin, profit) {
+            const historyItem = {
+                name: window.playerData.name,
+                game: gameName,
+                modality: modality,
+                bet: bet + 'M ⭐',
+                isWin: isWin,
+                profit: profit,
+                timestamp: Date.now(),
+                time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
+            };
+
+            if (db) {
+                try {
+                    await addDoc(collection(db, 'artifacts', appId, 'public', 'data', 'history'), historyItem);
+                } catch (e) {
+                    console.error("Error saving to Firestore:", e);
+                    window.betHistory.unshift(historyItem);
+                    updateHistoryTable();
+                }
+            } else {
+                window.betHistory.unshift(historyItem);
+                updateHistoryTable();
+            }
+        }
+
+        window.addEventListener('DOMContentLoaded', () => {
+            initFirebaseApp();
+        });
+    </script>
+
+    <!-- ================= GAMEPLAY & UI SCRIPT ================= -->
+    <script>
+        // Modality Definitions for the 4 Games
+        const gameModalities = {
+            ruleta: {
+                title: "Ruleta de Riesgo",
+                icon: "🎡",
+                options: [
+                    { id: 'doble', name: "Doble o Nada", desc: "Probabilidad: 50% | Premio: x2" },
+                    { id: 'triple', name: "Triple o Nada", desc: "Probabilidad: 25% | Premio: x3" },
+                    { id: 'cuadruple', name: "Cuádruple o Nada", desc: "Probabilidad: 10% | Premio: x4" }
+                ]
+            },
+            slots: {
+                title: "Tragamonedas Estelar",
+                icon: "🎰",
+                options: [
+                    { id: 'estandar', name: "Estándar", desc: "Premio: x2 | 3 Símbolos (4 opciones)" },
+                    { id: 'galactico', name: "Galáctico", desc: "Premio: x3 | 3 Símbolos (5 opciones)" },
+                    { id: 'hiperespacio', name: "Hiperespacio", desc: "Premio: x5 | 3 Símbolos (6 opciones)" }
+                ]
+            },
+            cofres: {
+                title: "Cofres del Tesoro",
+                icon: "🗝️",
+                options: [
+                    { id: '3cofres', name: "3 Cofres", desc: "1 Trampa / 2 Tesoros | Premio: x2" },
+                    { id: '5cofres', name: "5 Cofres", desc: "2 Trampas / 3 Tesoros | Premio: x3" },
+                    { id: '4letales', name: "4 Cofres Letales", desc: "3 Trampas / 1 Tesoro | Premio: x4" }
+                ]
+            },
+            blackjack: {
+                title: "Blackjack Rápido (21)",
+                icon: "🃏",
+                options: [
+                    { id: 'estandar', name: "Duelo Estándar", desc: "Premio: x2 | Reglas Clásicas" },
+                    { id: 'tenso', name: "Mano Tensa", desc: "Premio: x3 | Dealer agresivo" },
+                    { id: 'extremo', name: "Blackjack Extremo", desc: "Premio: x4 | Mayor riesgo" }
+                ]
+            }
+        };
+
+        function openModalitySelector(gameId) {
+            window.currentSelectedGame = gameId;
+            const config = gameModalities[gameId];
+            document.getElementById('modalityGameIcon').innerText = config.icon;
+            document.getElementById('modalityGameTitle').innerText = config.title;
+
+            const container = document.getElementById('modalityOptionsContainer');
+            container.innerHTML = '';
+
+            config.options.forEach((opt, idx) => {
+                container.innerHTML += `
+                    <label class="cursor-pointer block bg-zinc-900 border border-zinc-700 hover:border-casino-gold p-3.5 rounded-xl transition flex items-center gap-3">
+                        <input type="radio" name="modalityRadio" value="${opt.id}" ${idx === 0 ? 'checked' : ''} class="accent-amber-500 w-4 h-4">
+                        <div>
+                            <p class="text-sm font-bold text-amber-300">${opt.name}</p>
+                            <p class="text-xs text-gray-400">${opt.desc}</p>
+                        </div>
+                    </label>
+                `;
+            });
+
+            document.getElementById('modalityModal').classList.remove('hidden');
+        }
+
+        function closeModalityModal() {
+            document.getElementById('modalityModal').classList.add('hidden');
+        }
+
+        function proceedToBetModal() {
+            const checked = document.querySelector('input[name="modalityRadio"]:checked');
+            if (!checked) return;
+            window.currentSelectedModality = checked.value;
+            closeModalityModal();
+
+            const config = gameModalities[window.currentSelectedGame];
+            const optObj = config.options.find(o => o.id === window.currentSelectedModality);
+            window.playerData.modalityName = optObj.name;
+
+            // Open bet modal
+            document.getElementById('betGameIcon').innerText = config.icon;
+            document.getElementById('betTitle').innerText = `${config.title} (${optObj.name})`;
+            document.getElementById('betModal').classList.remove('hidden');
+            document.getElementById('modalPlayerName').focus();
+        }
+
+        function backToModalityModal() {
+            document.getElementById('betModal').classList.add('hidden');
+            openModalitySelector(window.currentSelectedGame);
+        }
+
+        function closeBetModal() {
+            document.getElementById('betModal').classList.add('hidden');
+        }
+
+        function setQuickBet(val) {
+            document.getElementById('modalBetAmount').value = val;
+        }
+
+        function submitBetModal(event) {
+            event.preventDefault();
+            const name = document.getElementById('modalPlayerName').value.trim();
+            const bet = parseFloat(document.getElementById('modalBetAmount').value);
+
+            if (!name || isNaN(bet) || bet <= 0) return;
+
+            window.playerData.name = name;
+            window.playerData.betMillions = bet;
+
+            closeBetModal();
+            renderGameInterface(window.currentSelectedGame, window.currentSelectedModality);
+        }
+
+        function returnToLobby() {
+            window.currentSelectedGame = null;
+            document.getElementById('lobbyView').classList.remove('hidden');
+            document.getElementById('gameView').classList.add('hidden');
+            document.getElementById('lobbyNavBtn').classList.add('hidden');
+        }
+
+        // Render Active Game
+        function renderGameInterface(gameId, modality) {
+            document.getElementById('lobbyView').classList.add('hidden');
+            document.getElementById('gameView').classList.remove('hidden');
+            document.getElementById('lobbyNavBtn').classList.remove('hidden');
+
+            const container = document.getElementById('gameView');
+            container.innerHTML = '';
+
+            if (gameId === 'ruleta') {
+                container.innerHTML = `
+                    <div class="bg-casino-cardBg border border-amber-500/30 rounded-3xl p-6 sm:p-8 shadow-2xl max-w-2xl mx-auto text-center">
+                        <div class="flex justify-between items-center mb-6">
+                            <div>
+                                <span class="text-xs uppercase tracking-widest text-amber-400 font-bold">Ruleta de Riesgo</span>
+                                <h3 class="cinzel-font text-xl font-bold text-white">${window.playerData.modalityName}</h3>
+                            </div>
+                            <div class="bg-amber-500/20 border border-amber-500/40 px-4 py-2 rounded-xl text-amber-300 font-bold text-sm">
+                                Apuesta: ${window.playerData.betMillions}M ⭐
+                            </div>
+                        </div>
+
+                        <!-- Canvas Roulette -->
+                        <div class="relative w-72 h-72 sm:w-80 sm:h-80 mx-auto mb-8 flex items-center justify-center">
+                            <div class="absolute -top-4 z-20 text-3xl animate-bounce drop-shadow-[0_0_10px_rgba(255,215,0,0.8)]">▼</div>
+                            <canvas id="rouletteCanvas" width="320" height="320" class="w-full h-full rounded-full shadow-2xl border-4 border-amber-500/60 bg-black"></canvas>
+                        </div>
+
+                        <button id="spinRouletteBtn" onclick="executeRuletaGame('${modality}')" class="w-full py-4 bg-gradient-to-r from-amber-500 to-yellow-600 hover:from-amber-400 hover:to-yellow-500 text-black font-bold rounded-xl text-base transition shadow-lg shadow-amber-500/20 cinzel-font">
+                            ¡GIRAR RULETA AHORA! 🎡
+                        </button>
+                    </div>
+                `;
+                initRouletteCanvas(modality);
+            } else if (gameId === 'slots') {
+                container.innerHTML = `
+                    <div class="bg-casino-cardBg border border-blue-500/30 rounded-3xl p-6 sm:p-8 shadow-2xl max-w-2xl mx-auto text-center">
+                        <div class="flex justify-between items-center mb-6">
+                            <div>
+                                <span class="text-xs uppercase tracking-widest text-blue-400 font-bold">Tragamonedas Estelar</span>
+                                <h3 class="cinzel-font text-xl font-bold text-white">${window.playerData.modalityName}</h3>
+                            </div>
+                            <div class="bg-blue-500/20 border border-blue-500/40 px-4 py-2 rounded-xl text-blue-300 font-bold text-sm">
+                                Apuesta: ${window.playerData.betMillions}M ⭐
+                            </div>
+                        </div>
+
+                        <div class="bg-black/60 border border-blue-500/40 rounded-2xl p-6 mb-8 flex justify-center gap-4">
+                            <div id="slot1" class="w-20 h-24 bg-zinc-900 border border-zinc-700 rounded-xl flex items-center justify-center text-4xl shadow-inner transition-transform">⭐</div>
+                            <div id="slot2" class="w-20 h-24 bg-zinc-900 border border-zinc-700 rounded-xl flex items-center justify-center text-4xl shadow-inner transition-transform">💎</div>
+                            <div id="slot3" class="w-20 h-24 bg-zinc-900 border border-zinc-700 rounded-xl flex items-center justify-center text-4xl shadow-inner transition-transform">👑</div>
+                        </div>
+
+                        <p id="slotResultText" class="text-gray-300 text-sm mb-6 h-6">Alinea 3 símbolos iguales para ganar</p>
+
+                        <button id="spinSlotBtn" onclick="executeSlotsGame('${modality}')" class="w-full py-4 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-500 hover:to-indigo-500 text-white font-bold rounded-xl text-base transition shadow-lg shadow-blue-500/20 cinzel-font">
+                            ¡TIRAR RODILLOS! 🎰
+                        </button>
+                    </div>
+                `;
+            } else if (gameId === 'cofres') {
+                let numChests = 3;
+                if (modality === '5cofres') numChests = 5;
+                if (modality === '4letales') numChests = 4;
+
+                let chestsHtml = '';
+                for (let i = 0; i < numChests; i++) {
+                    chestsHtml += `
+                        <div onclick="executeChestGame(${i}, '${modality}')" class="chest-box cursor-pointer bg-zinc-900 hover:bg-zinc-800 border border-amber-600/50 hover:border-amber-400 p-5 rounded-2xl transition duration-300 hover:scale-105 flex flex-col items-center gap-2 shadow-lg">
+                            <span class="text-4xl">🗝️</span>
+                            <span class="text-xs font-bold text-amber-300">Cofre ${i+1}</span>
+                        </div>
+                    `;
+                }
+
+                container.innerHTML = `
+                    <div class="bg-casino-cardBg border border-amber-600/30 rounded-3xl p-6 sm:p-8 shadow-2xl max-w-2xl mx-auto text-center">
+                        <div class="flex justify-between items-center mb-6">
+                            <div>
+                                <span class="text-xs uppercase tracking-widest text-amber-400 font-bold">Cofres del Tesoro</span>
+                                <h3 class="cinzel-font text-xl font-bold text-white">${window.playerData.modalityName}</h3>
+                            </div>
+                            <div class="bg-amber-600/20 border border-amber-600/40 px-4 py-2 rounded-xl text-amber-300 font-bold text-sm">
+                                Apuesta: ${window.playerData.betMillions}M ⭐
+                            </div>
+                        </div>
+
+                        <div id="chestsContainer" class="grid grid-cols-2 sm:grid-cols-3 gap-4 mb-8">
+                            ${chestsHtml}
+                        </div>
+
+                        <p id="chestResultText" class="text-gray-300 text-sm mb-2 h-6">Haz clic en uno de los cofres para abrirlo</p>
+                    </div>
+                `;
+            } else if (gameId === 'blackjack') {
+                container.innerHTML = `
+                    <div class="bg-casino-cardBg border border-emerald-500/30 rounded-3xl p-6 sm:p-8 shadow-2xl max-w-2xl mx-auto text-center">
+                        <div class="flex justify-between items-center mb-6">
+                            <div>
+                                <span class="text-xs uppercase tracking-widest text-emerald-400 font-bold">Blackjack Rápido (21)</span>
+                                <h3 class="cinzel-font text-xl font-bold text-white">${window.playerData.modalityName}</h3>
+                            </div>
+                            <div class="bg-emerald-500/20 border border-emerald-500/40 px-4 py-2 rounded-xl text-emerald-300 font-bold text-sm">
+                                Apuesta: ${window.playerData.betMillions}M ⭐
+                            </div>
+                        </div>
+
+                        <div class="space-y-6 mb-8">
+                            <div class="bg-black/60 p-4 rounded-2xl border border-zinc-800">
+                                <p class="text-xs text-gray-400 mb-3">Cartas de la Banca (<span id="dealerScore">?</span>)</p>
+                                <div id="dealerCards" class="flex justify-center gap-3 min-h-[90px] items-center"></div>
+                            </div>
+                            <div class="bg-black/60 p-4 rounded-2xl border border-emerald-500/30">
+                                <p class="text-xs text-emerald-400 mb-3">Tus Cartas (<span id="playerScore">0</span>)</p>
+                                <div id="playerCards" class="flex justify-center gap-3 min-h-[90px] items-center"></div>
+                            </div>
+                        </div>
+
+                        <div id="bjControls" class="flex gap-4">
+                            <button onclick="bjHit()" class="flex-1 py-3 bg-blue-600 hover:bg-blue-500 text-white font-bold rounded-xl text-sm transition shadow">Pedir Carta 🃏</button>
+                            <button onclick="bjStand()" class="flex-1 py-3 bg-emerald-600 hover:bg-emerald-500 text-white font-bold rounded-xl text-sm transition shadow">Plantarse 🛑</button>
+                        </div>
+                    </div>
+                `;
+                initBlackjackGame(modality);
+            }
+        }
+
+        // ================= GAME 1: RULETA CANVAS =================
+        let rouletteAngle = 0;
+        let isSpinningRoulette = false;
+
+        function initRouletteCanvas(modality) {
+            const canvas = document.getElementById('rouletteCanvas');
+            if (!canvas) return;
+            const ctx = canvas.getContext('2d');
+            
+            let winProb = 0.50;
+            if (modality === 'triple') winProb = 0.25;
+            if (modality === 'cuadruple') winProb = 0.10;
+
+            drawWheel(ctx, rouletteAngle, winProb);
+        }
+
+        function drawWheel(ctx, currentAngle, winProb) {
+            const centerX = ctx.canvas.width / 2;
+            const centerY = ctx.canvas.height / 2;
+            const radius = centerX - 10;
+
+            ctx.clearRect(0, 0, ctx.canvas.width, ctx.canvas.height);
+
+            const winAngleSize = winProb * 2 * Math.PI;
+
+            ctx.save();
+            ctx.translate(centerX, centerY);
+            ctx.rotate(currentAngle);
+
+            // Win section
+            ctx.beginPath();
+            ctx.moveTo(0, 0);
+            ctx.arc(0, 0, radius, 0, winAngleSize);
+            ctx.fillStyle = '#00FF66';
+            ctx.fill();
+            ctx.strokeStyle = '#D4AF37';
+            ctx.lineWidth = 3;
+            ctx.stroke();
+
+            // Loss section
+            ctx.beginPath();
+            ctx.moveTo(0, 0);
+            ctx.arc(0, 0, radius, winAngleSize, 2 * Math.PI);
+            ctx.fillStyle = '#DC2626';
+            ctx.fill();
+            ctx.stroke();
+
+            ctx.restore();
+
+            // Center Knob
+            ctx.beginPath();
+            ctx.arc(centerX, centerY, 25, 0, 2 * Math.PI);
+            ctx.fillStyle = '#D4AF37';
+            ctx.fill();
+            ctx.lineWidth = 3;
+            ctx.strokeStyle = '#000';
+            ctx.stroke();
+        }
+
+        function executeRuletaGame(modality) {
+            if (isSpinningRoulette) return;
+            isSpinningRoulette = true;
+            const btn = document.getElementById('spinRouletteBtn');
+            btn.disabled = true;
+            btn.innerText = "GIRANDO...";
+
+            const canvas = document.getElementById('rouletteCanvas');
+            const ctx = canvas.getContext('2d');
+
+            let winProb = 0.50;
+            let multiplier = 2;
+            if (modality === 'triple') { winProb = 0.25; multiplier = 3; }
+            if (modality === 'cuadruple') { winProb = 0.10; multiplier = 4; }
+
+            const isWin = Math.random() < winProb;
+            const winAngleSize = winProb * 2 * Math.PI;
+            let targetAngleWithinWheel = isWin ? (Math.random() * (winAngleSize - 0.2) + 0.1) : (winAngleSize + Math.random() * ((2 * Math.PI - winAngleSize) - 0.2) + 0.1);
+
+            const desiredFinalAngle = 3 * Math.PI / 2 - targetAngleWithinWheel;
+            const extraSpins = 5 * 2 * Math.PI;
+            const totalRotation = extraSpins + (desiredFinalAngle - (rouletteAngle % (2 * Math.PI)));
+
+            let startAngle = rouletteAngle;
+            let startTime = null;
+            const duration = 3500;
+
+            function animateSpin(timestamp) {
+                if (!startTime) startTime = timestamp;
+                let progress = (timestamp - startTime) / duration;
+                if (progress > 1) progress = 1;
+
+                let easeProgress = 1 - Math.pow(1 - progress, 3);
+                rouletteAngle = startAngle + totalRotation * easeProgress;
+
+                drawWheel(ctx, rouletteAngle, winProb);
+
+                if (progress < 1) {
+                    requestAnimationFrame(animateSpin);
+                } else {
+                    isSpinningRoulette = false;
+                    btn.disabled = false;
+                    btn.innerText = "¡GIRAR NUEVAMENTE! 🎡";
+
+                    let profit = isWin ? window.playerData.betMillions * multiplier : -window.playerData.betMillions;
+                    if (isWin) confetti({ particleCount: 100, spread: 70, origin: { y: 0.6 } });
+
+                    window.recordGameHistory('Ruleta', window.playerData.modalityName, window.playerData.betMillions, isWin, profit);
+                    showResultToast(isWin, profit);
+                }
+            }
+            requestAnimationFrame(animateSpin);
+        }
+
+        // ================= GAME 2: SLOTS =================
+        function executeSlotsGame(modality) {
+            const s1 = document.getElementById('slot1');
+            const s2 = document.getElementById('slot2');
+            const s3 = document.getElementById('slot3');
+            const btn = document.getElementById('spinSlotBtn');
+            const resText = document.getElementById('slotResultText');
+
+            btn.disabled = true;
+            btn.innerText = "GIRANDO RODILLOS...";
+            resText.innerText = "La suerte gira...";
+
+            let symbols = ['⭐', '💎', '👑', '🍒'];
+            let winProb = 0.35;
+            let multiplier = 2;
+
+            if (modality === 'galactico') { symbols = ['⭐', '💎', '👑', '🍒', '🔮']; winProb = 0.22; multiplier = 3; }
+            if (modality === 'hiperespacio') { symbols = ['⭐', '💎', '👑', '🍒', '🔮', '🚀']; winProb = 0.12; multiplier = 5; }
+
+            let counter = 0;
+            const interval = setInterval(() => {
+                s1.innerText = symbols[Math.floor(Math.random() * symbols.length)];
+                s2.innerText = symbols[Math.floor(Math.random() * symbols.length)];
+                s3.innerText = symbols[Math.floor(Math.random() * symbols.length)];
+                counter++;
+
+                if (counter > 20) {
+                    clearInterval(interval);
+                    const isWin = Math.random() < winProb;
+                    let finalSymbol = symbols[Math.floor(Math.random() * symbols.length)];
+                    
+                    if (isWin) {
+                        s1.innerText = finalSymbol; s2.innerText = finalSymbol; s3.innerText = finalSymbol;
+                        resText.innerText = `¡JACKPOT! Tres ${finalSymbol} alineados. ¡Ganaste x${multiplier}!`;
+                        confetti({ particleCount: 120, spread: 80, origin: { y: 0.6 } });
+                        window.recordGameHistory('Tragamonedas', window.playerData.modalityName, window.playerData.betMillions, true, window.playerData.betMillions * multiplier);
+                        showResultToast(true, window.playerData.betMillions * multiplier);
+                    } else {
+                        s1.innerText = symbols[0]; s2.innerText = symbols[1]; s3.innerText = symbols[2];
+                        resText.innerText = "No hubo combinación ganadora. Sigue intentando.";
+                        window.recordGameHistory('Tragamonedas', window.playerData.modalityName, window.playerData.betMillions, false, -window.playerData.betMillions);
+                        showResultToast(false, -window.playerData.betMillions);
+                    }
+                    btn.disabled = false;
+                    btn.innerText = "¡TIRAR NUEVAMENTE! 🎰";
+                }
+            }, 100);
+        }
+
+        // ================= GAME 3: COFRES =================
+        function executeChestGame(selectedIndex, modality) {
+            const boxes = document.querySelectorAll('.chest-box');
+            boxes.forEach(b => b.onclick = null);
+
+            let numChests = 3;
+            let trapCount = 1;
+            let multiplier = 2;
+
+            if (modality === '5cofres') { numChests = 5; trapCount = 2; multiplier = 3; }
+            if (modality === '4letales') { numChests = 4; trapCount = 3; multiplier = 4; }
+
+            // Randomly select trap indices
+            let traps = [];
+            while(traps.length < trapCount) {
+                let r = Math.floor(Math.random() * numChests);
+                if(!traps.includes(r)) traps.push(r);
+            }
+
+            const isWin = !traps.includes(selectedIndex);
+            let profit = isWin ? window.playerData.betMillions * multiplier : -window.playerData.betMillions;
+
+            boxes.forEach((box, idx) => {
+                if (traps.includes(idx)) {
+                    box.innerHTML = `<span class="text-4xl animate-bounce">💣</span><span class="text-xs font-bold text-rose-400">Trampa</span>`;
+                    box.className = "bg-rose-950/80 border border-rose-500 p-5 rounded-2xl flex flex-col items-center gap-2";
+                } else {
+                    box.innerHTML = `<span class="text-4xl animate-bounce">👑</span><span class="text-xs font-bold text-amber-300">¡Tesoro x${multiplier}!</span>`;
+                    box.className = "bg-amber-950/80 border border-amber-400 p-5 rounded-2xl flex flex-col items-center gap-2 shadow-lg shadow-amber-500/30";
+                }
+            });
+
+            if (isWin) confetti({ particleCount: 120, spread: 80, origin: { y: 0.6 } });
+
+            document.getElementById('chestResultText').innerText = isWin ? `¡Encontraste el tesoro! Ganaste x${multiplier}.` : "¡Caíste en la trampa! Perdiste la apuesta.";
+            window.recordGameHistory('Cofres del Tesoro', window.playerData.modalityName, window.playerData.betMillions, isWin, profit);
+            showResultToast(isWin, profit);
+        }
+
+        // ================= GAME 4: BLACKJACK =================
+        let bjState = { playerHand: [], dealerHand: [], deck: [], gameOver: false, multiplier: 2 };
+
+        function initBlackjackGame(modality) {
+            if (modality === 'tenso') bjState.multiplier = 3;
+            else if (modality === 'extremo') bjState.multiplier = 4;
+            else bjState.multiplier = 2;
+
+            const suits = ['♠', '♥', '♦', '♣'];
+            const values = ['2', '3', '4', '5', '6', '7', '8', '9', '10', 'J', 'Q', 'K', 'A'];
+            let deck = [];
+            suits.forEach(s => {
+                values.forEach(v => {
+                    let weight = parseInt(v);
+                    if (['J', 'Q', 'K'].includes(v)) weight = 10;
+                    if (v === 'A') weight = 11;
+                    deck.push({ v: v + s, weight, suit: s, val: v });
+                });
+            });
+            deck.sort(() => Math.random() - 0.5);
+
+            bjState.deck = deck;
+            bjState.playerHand = [deck.pop(), deck.pop()];
+            bjState.dealerHand = [deck.pop(), deck.pop()];
+            bjState.gameOver = false;
+
+            updateBjUI(false);
+        }
+
+        function calculateHand(hand) {
+            let sum = hand.reduce((acc, c) => acc + c.weight, 0);
+            let aces = hand.filter(c => c.val === 'A').length;
+            while (sum > 21 && aces > 0) {
+                sum -= 10;
+                aces--;
+            }
+            return sum;
+        }
+
+        function renderCardHTML(cardObj, faceDown = false) {
+            if (faceDown) {
+                return `<div class="w-14 h-20 bg-blue-900 border-2 border-amber-400 rounded-lg flex items-center justify-center text-amber-300 font-bold shadow-md">🎴</div>`;
+            }
+            const isRed = cardObj.suit === '♥' || cardObj.suit === '♦';
+            return `
+                <div class="w-14 h-20 bg-white text-gray-900 border-2 border-zinc-300 rounded-lg flex flex-col justify-between p-2 font-bold shadow-xl animate-in fade-in zoom-in duration-300">
+                    <span class="text-xs ${isRed ? 'text-red-600' : 'text-black'}">${cardObj.val}</span>
+                    <span class="text-xl text-center ${isRed ? 'text-red-600' : 'text-black'}">${cardObj.suit}</span>
+                    <span class="text-xs text-right ${isRed ? 'text-red-600' : 'text-black'}">${cardObj.val}</span>
+                </div>
+            `;
+        }
+
+        function updateBjUI(revealDealer) {
+            const pCardsEl = document.getElementById('playerCards');
+            const dCardsEl = document.getElementById('dealerCards');
+            const pScoreEl = document.getElementById('playerScore');
+            const dScoreEl = document.getElementById('dealerScore');
+
+            pCardsEl.innerHTML = bjState.playerHand.map(c => renderCardHTML(c, false)).join('');
+            pScoreEl.innerText = calculateHand(bjState.playerHand);
+
+            if (revealDealer) {
+                dCardsEl.innerHTML = bjState.dealerHand.map(c => renderCardHTML(c, false)).join('');
+                dScoreEl.innerText = calculateHand(bjState.dealerHand);
+            } else {
+                dCardsEl.innerHTML = renderCardHTML(bjState.dealerHand[0], false) + renderCardHTML(null, true);
+                dScoreEl.innerText = bjState.dealerHand[0].weight;
+            }
+        }
+
+        function bjHit() {
+            if (bjState.gameOver) return;
+            bjState.playerHand.push(bjState.deck.pop());
+            let pScore = calculateHand(bjState.playerHand);
+            updateBjUI(false);
+
+            if (pScore > 21) {
+                bjState.gameOver = true;
+                updateBjUI(true);
+                document.getElementById('bjControls').innerHTML = `<button onclick="openModalitySelector('blackjack')" class="w-full py-3 bg-zinc-800 text-white font-bold rounded-xl text-sm">Jugar de Nuevo 🃏</button>`;
+                window.recordGameHistory('Blackjack', window.playerData.modalityName, window.playerData.betMillions, false, -window.playerData.betMillions);
+                showResultToast(false, -window.playerData.betMillions);
+            }
+        }
+
+        function bjStand() {
+            if (bjState.gameOver) return;
+            bjState.gameOver = true;
+
+            while (calculateHand(bjState.dealerHand) < 17) {
+                bjState.dealerHand.push(bjState.deck.pop());
+            }
+
+            updateBjUI(true);
+
+            let pScore = calculateHand(bjState.playerHand);
+            let dScore = calculateHand(bjState.dealerHand);
+
+            let isWin = false;
+            let profit = -window.playerData.betMillions;
+
+            if (dScore > 21 || (pScore <= 21 && pScore > dScore)) {
+                isWin = true;
+                profit = window.playerData.betMillions * bjState.multiplier;
+                confetti({ particleCount: 100, spread: 70, origin: { y: 0.6 } });
+            }
+
+            document.getElementById('bjControls').innerHTML = `<button onclick="openModalitySelector('blackjack')" class="w-full py-3 bg-zinc-800 text-white font-bold rounded-xl text-sm">Jugar de Nuevo 🃏</button>`;
+            window.recordGameHistory('Blackjack', window.playerData.modalityName, window.playerData.betMillions, isWin, profit);
+            showResultToast(isWin, profit);
+        }
+
+        // ================= HISTORY & WHATSAPP =================
+        function updateHistoryTable() {
+            const tbody = document.getElementById('historyTableBody');
+            if (!window.betHistory || window.betHistory.length === 0) {
+                tbody.innerHTML = `<tr id="emptyHistoryRow"><td colspan="6" class="py-8 text-center text-gray-500 text-xs">Aún no hay apuestas registradas en esta sesión. ¡Elige un juego arriba!</td></tr>`;
+                return;
+            }
+
+            let html = '';
+            window.betHistory.forEach(item => {
+                html += `
+                    <tr class="hover:bg-zinc-900/50 transition">
+                        <td class="py-3 px-4 text-xs text-gray-400">${item.time || 'Ahora'}</td>
+                        <td class="py-3 px-4 font-semibold text-white">${item.name}</td>
+                        <td class="py-3 px-4 text-xs text-amber-300 font-medium">${item.game} <span class="text-gray-400">(${item.modality})</span></td>
+                        <td class="py-3 px-4 text-xs text-amber-400 font-bold">${item.bet}</td>
+                        <td class="py-3 px-4">
+                            <span class="px-2.5 py-1 rounded-full text-xs font-bold border ${item.isWin ? 'bg-emerald-500/20 text-emerald-400 border-emerald-500/30' : 'bg-rose-500/20 text-rose-400 border-rose-500/30'}">
+                                ${item.isWin ? 'GANÓ 🏆' : 'PERDIÓ ❌'}
+                            </span>
+                        </td>
+                        <td class="py-3 px-4 text-right font-mono font-bold text-xs ${item.isWin ? 'text-emerald-400' : 'text-rose-400'}">
+                            ${item.isWin ? '+' : ''}${item.profit.toLocaleString()}M ⭐
+                        </td>
+                    </tr>
+                `;
+            });
+            tbody.innerHTML = html;
+        }
+
+        function copyHistoryText() {
+            if (!window.betHistory || window.betHistory.length === 0) {
+                showToastNotification("No hay apuestas para copiar aún.");
+                return;
+            }
+            let text = "🎰 *RESUMEN CASINO ESTELAR ROYALE* ⭐\n\n";
+            window.betHistory.slice(0, 10).forEach((item, index) => {
+                text += `${index + 1}. *${item.name}* (${item.game} - ${item.modality}) - ${item.bet} -> *${item.isWin ? 'GANÓ +' + item.profit.toLocaleString() + 'M ⭐' : 'PERDIÓ'}*\n`;
+            });
+            text += "\n¡Ven a probar tu suerte en la dinámica del grupo!";
+
+            if (navigator.clipboard) {
+                navigator.clipboard.writeText(text).then(() => {
+                    showToastNotification("¡Resumen copiado listo para WhatsApp!");
+                });
+            } else {
+                const textarea = document.createElement('textarea');
+                textarea.value = text;
+                document.body.appendChild(textarea);
+                textarea.select();
+                try {
+                    document.execCommand('copy');
+                    showToastNotification("¡Resumen copiado con éxito!");
+                } catch (err) {
+                    console.error('Error al copiar', err);
+                }
+                document.body.removeChild(textarea);
+            }
+        }
+
+        function showResultToast(isWin, profit) {
+            const div = document.createElement('div');
+            div.className = `fixed bottom-8 left-1/2 -translate-x-1/2 z-50 px-6 py-4 rounded-2xl shadow-2xl border text-center animate-bounce ${isWin ? 'bg-emerald-950 border-emerald-500 text-emerald-300 neon-glow-green' : 'bg-rose-950 border-rose-500 text-rose-300'}`;
+            div.innerHTML = `
+                <p class="cinzel-font font-bold text-lg mb-1">${isWin ? '🏆 ¡VICTORIA ÉPICA!' : '💀 ¡DERROTA!'}</p>
+                <p class="text-xs text-white">${window.playerData.name}: <strong class="${isWin ? 'text-emerald-400' : 'text-rose-400'}">${isWin ? '+' : ''}${profit.toLocaleString()}M ⭐</strong></p>
+            `;
+            document.body.appendChild(div);
+            setTimeout(() => div.remove(), 4000);
+        }
+
+        function showToastNotification(msg) {
+            const div = document.createElement('div');
+            div.className = "fixed bottom-6 right-6 z-50 bg-emerald-600 text-white px-4 py-3 rounded-xl shadow-2xl text-sm font-semibold animate-bounce";
+            div.innerText = msg;
+            document.body.appendChild(div);
+            setTimeout(() => div.remove(), 3000);
+        }
+    </script>
+</body>
+</html>
