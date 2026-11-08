@@ -206,7 +206,7 @@
                     </thead>
                     <tbody id="historyTableBody" class="text-sm divide-y divide-zinc-900">
                         <tr id="emptyHistoryRow">
-                            <td colspan="6" class="py-8 text-center text-gray-500 text-xs">Cectando con Firebase en tiempo real...</td>
+                            <td colspan="6" class="py-8 text-center text-gray-500 text-xs">Conectando con Firebase en tiempo real...</td>
                         </tr>
                     </tbody>
                 </table>
@@ -293,101 +293,95 @@
         </div>
     </div>
 
-    <!-- ================= FIREBASE & APP LOGIC ================= -->
+    <!-- ================= FIREBASE REALTIME DATABASE INTEGRATION ================= -->
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
-        import { getAuth, signInAnonymously, signInWithCustomToken } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
-        import { getFirestore, collection, addDoc, onSnapshot } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+        import { getDatabase, ref, push, set, onValue } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-database.js";
 
         let db = null;
-        let auth = null;
-        let userId = null;
-        const appId = typeof __app_id !== 'undefined' ? __app_id : 'casino-estelar-royale-whatsapp';
-
-        // Global State
-        window.currentSelectedGame = null;
-        window.currentSelectedModality = null;
-        window.playerData = { name: '', betMillions: 10, modalityName: '' };
         window.betHistory = [];
 
-        // Initialize Firebase
-        async function initFirebaseApp() {
+        // Tus credenciales exactas de Firebase Realtime Database
+        const firebaseConfig = {
+            apiKey: "AIzaSyBHuNPoIFLd6aKdaTSiKQjU1EhiRDZciCQ",
+            authDomain: "casino-magico.firebaseapp.com",
+            databaseURL: "https://casino-magico-default-rtdb.firebaseio.com",
+            projectId: "casino-magico",
+            storageBucket: "casino-magico.firebasestorage.app",
+            messagingSenderId: "333850684860",
+            appId: "1:333850684860:web:4047f156d7c861866ccfb9",
+            measurementId: "G-X1K6J8PQTY"
+        };
+
+        try {
+            const app = initializeApp(firebaseConfig);
+            db = getDatabase(app);
+
             const statusDot = document.getElementById('firebaseStatusDot');
             const statusText = document.getElementById('firebaseStatusText');
-            try {
-                const firebaseConfig = JSON.parse(typeof __firebase_config !== 'undefined' ? __firebase_config : '{}');
-                if (!firebaseConfig.apiKey) {
-                    throw new Error("No config available");
-                }
-                const app = initializeApp(firebaseConfig);
-                auth = getAuth(app);
-                db = getFirestore(app);
+            statusDot.className = "w-2.5 h-2.5 rounded-full bg-emerald-400";
+            statusText.innerText = "Sincronizado en Vivo";
 
-                if (typeof __initial_auth_token !== 'undefined' && __initial_auth_token) {
-                    await signInWithCustomToken(auth, __initial_auth_token);
-                } else {
-                    await signInAnonymously(auth);
-                }
-                userId = auth.currentUser?.uid || crypto.randomUUID();
+            const historyRef = ref(db, 'historial');
 
-                statusDot.className = "w-2.5 h-2.5 rounded-full bg-emerald-400";
-                statusText.innerText = "Sincronizado en Vivo";
-
-                setupRealtimeHistory();
-            } catch (e) {
-                console.warn("Firebase running in local mode:", e);
-                statusDot.className = "w-2.5 h-2.5 rounded-full bg-amber-400";
-                statusText.innerText = "Modo Local (Sin red)";
-                updateHistoryTable();
-            }
-        }
-
-        function setupRealtimeHistory() {
-            if (!db) return;
-            const q = collection(db, 'artifacts', appId, 'public', 'data', 'history');
-            onSnapshot(q, (snapshot) => {
+            // Escuchar cambios en tiempo real
+            onValue(historyRef, (snapshot) => {
+                const data = snapshot.val();
                 let items = [];
-                snapshot.forEach(docSnap => {
-                    items.push({ id: docSnap.id, ...docSnap.data() });
-                });
-                // Sort in memory by timestamp descending
-                items.sort((a, b) => (b.timestamp || 0) - (a.timestamp || 0));
+                if (data) {
+                    items = Object.values(data);
+                    items.sort((a, b) => (b.timestamp || 0) - (a.timestamp || 0));
+                }
                 window.betHistory = items;
                 updateHistoryTable();
-            }, (error) => {
-                console.error("Firestore error:", error);
             });
-        }
 
-        window.recordGameHistory = async function(gameName, modality, bet, isWin, profit) {
-            const historyItem = {
-                name: window.playerData.name,
-                game: gameName,
-                modality: modality,
-                bet: bet + 'M ⭐',
-                isWin: isWin,
-                profit: profit,
-                timestamp: Date.now(),
-                time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
-            };
+            // Función para registrar jugadas en la nube
+            window.recordGameHistory = async function(gameName, modality, bet, isWin, profit) {
+                const historyItem = {
+                    name: window.playerData.name,
+                    game: gameName,
+                    modality: modality,
+                    bet: bet + 'M ⭐',
+                    isWin: isWin,
+                    profit: profit,
+                    timestamp: Date.now(),
+                    time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
+                };
 
-            if (db) {
                 try {
-                    await addDoc(collection(db, 'artifacts', appId, 'public', 'data', 'history'), historyItem);
+                    const newRef = push(historyRef);
+                    await set(newRef, historyItem);
                 } catch (e) {
-                    console.error("Error saving to Firestore:", e);
+                    console.error("Error al guardar en Firebase:", e);
                     window.betHistory.unshift(historyItem);
                     updateHistoryTable();
                 }
-            } else {
+            };
+
+        } catch (e) {
+            console.warn("Firebase ejecutándose en modo local:", e);
+            const statusDot = document.getElementById('firebaseStatusDot');
+            const statusText = document.getElementById('firebaseStatusText');
+            statusDot.className = "w-2.5 h-2.5 rounded-full bg-amber-400";
+            statusText.innerText = "Modo Local";
+
+            window.recordGameHistory = async function(gameName, modality, bet, isWin, profit) {
+                const historyItem = {
+                    name: window.playerData.name,
+                    game: gameName,
+                    modality: modality,
+                    bet: bet + 'M ⭐',
+                    isWin: isWin,
+                    profit: profit,
+                    timestamp: Date.now(),
+                    time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
+                };
                 window.betHistory.unshift(historyItem);
                 updateHistoryTable();
-            }
+            };
+            updateHistoryTable();
         }
-
-        window.addEventListener('DOMContentLoaded', () => {
-            initFirebaseApp();
-        });
     </script>
 
     <!-- ================= GAMEPLAY & UI SCRIPT ================= -->
@@ -431,6 +425,10 @@
                 ]
             }
         };
+
+        window.currentSelectedGame = null;
+        window.currentSelectedModality = null;
+        window.playerData = { name: '', betMillions: 10, modalityName: '' };
 
         function openModalitySelector(gameId) {
             window.currentSelectedGame = gameId;
@@ -813,7 +811,6 @@
             if (modality === '5cofres') { numChests = 5; trapCount = 2; multiplier = 3; }
             if (modality === '4letales') { numChests = 4; trapCount = 3; multiplier = 4; }
 
-            // Randomly select trap indices
             let traps = [];
             while(traps.length < trapCount) {
                 let r = Math.floor(Math.random() * numChests);
